@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const res = require('express/lib/response');
 
 
 
@@ -22,6 +23,7 @@ async function run() {
         await client.connect();
         console.log('Database connected');
         const partsCollection = client.db('core_computer_castle').collection('parts');
+        const buyingCollection = client.db('core_computer_castle').collection('buying');
 
 
         app.get('/part', async (req, res) => {
@@ -29,6 +31,12 @@ async function run() {
             const cursor = partsCollection.find(query);
             const parts = await cursor.toArray();
             res.send(parts);
+        })
+
+        app.post('/buying', async (req, res) => {
+            const buying = req.body;
+            const result = await buyingCollection.insertOne(buying);
+            res.send(result);
         })
 
         app.get('/part/:id', async (req, res) => {
