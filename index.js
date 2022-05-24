@@ -24,7 +24,9 @@ async function run() {
         console.log('Database connected');
         const partsCollection = client.db('core_computer_castle').collection('parts');
         const buyingCollection = client.db('core_computer_castle').collection('buying');
+        const userCollection = client.db('core_computer_castle').collection('users');
 
+        //---------------show data from databse to ui--------------
 
         app.get('/part', async (req, res) => {
             const query = {};
@@ -33,11 +35,28 @@ async function run() {
             res.send(parts);
         })
 
+        //----------------send buyer info to database---------------
+
         app.post('/buying', async (req, res) => {
             const buying = req.body;
             const result = await buyingCollection.insertOne(buying);
             res.send(result);
         })
+
+
+        //------------show user order to mu orders page--------
+
+
+        app.get('/buying', async (req, res) => {
+            const buyer = req.query.buyer;
+            const query = { buyer: buyer };
+            const buying = await buyingCollection.find(query).toArray();
+            res.send(buying);
+        })
+
+
+
+        //---------------show single items in a single page------------
 
         app.get('/part/:id', async (req, res) => {
             const id = req.params.id;
@@ -46,6 +65,7 @@ async function run() {
             res.send(part);
         })
 
+        //---------------update qunatity from database------------------
 
         app.put('/part/:id', async (req, res) => {
             console.log(req.body);
@@ -61,6 +81,26 @@ async function run() {
             const result = await partsCollection.updateOne(filter, updatedInfo, options);
             res.send(result);
         })
+
+        // ------------get user data in database-------------//
+
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            // const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' })
+            // res.send({ result, token });
+            res.send(result);
+        })
+
+
+
     }
 
 
