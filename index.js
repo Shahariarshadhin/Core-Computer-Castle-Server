@@ -5,7 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const res = require('express/lib/response');
 
 
-
+const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -16,6 +16,25 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.axj0p.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+/////// --------verify jwt token--------////////////
+
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'Unauthorized access' })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden Access' })
+        }
+        req.decoded = decoded;
+
+        next();
+    })
+}
 
 async function run() {
 
@@ -47,11 +66,19 @@ async function run() {
         //------------show user order to mu orders page--------
 
 
-        app.get('/buying', async (req, res) => {
+        app.get('/buying', verifyJWT, async (req, res) => {
             const buyer = req.query.buyer;
-            const query = { buyer: buyer };
-            const buying = await buyingCollection.find(query).toArray();
-            res.send(buying);
+            const decodedEmail = req.decoded.email;
+            if (buyer === decodedEmail) {
+                const query = { buyer: buyer };
+                const buying = await buyingCollection.find(query).toArray();
+                res.send(buying);
+
+            }
+            else {
+                return res.status(403).send({ message: 'Forbidden Access' });
+            }
+
         })
 
 
@@ -94,9 +121,14 @@ async function run() {
 
             };
             const result = await userCollection.updateOne(filter, updateDoc, options);
-            // const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' })
-            // res.send({ result, token });
-            res.send(result);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' })
+            res.send({ result, token });
+
+        })
+
+        app.get('/user', async (req, res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users);
         })
 
 
