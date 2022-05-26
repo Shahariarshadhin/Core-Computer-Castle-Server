@@ -47,6 +47,7 @@ async function run() {
         const userCollection = client.db('core_computer_castle').collection('users');
         const paymentCollection = client.db('core_computer_castle').collection('payments');
         const reviewCollection = client.db('core_computer_castle').collection('reviews');
+        const userDataCollection = client.db('core_computer_castle').collection('userdatas');
 
         //---------------show data from databse to ui--------------
 
@@ -82,6 +83,13 @@ async function run() {
                 return res.status(403).send({ message: 'Forbidden Access' });
             }
 
+        })
+
+        app.get('/buying', verifyJWT, async (req, res) => {
+            const query = {};
+            const cursor = buyingCollection.find(query);
+            const buying = await cursor.toArray();
+            res.send(buying);
         })
 
 
@@ -225,6 +233,20 @@ async function run() {
         app.post('/part', async (req, res) => {
             const newParts = req.body;
             const result = await partsCollection.insertOne(newParts);
+            res.send(result);
+        })
+
+        app.post('/userdata', async (req, res) => {
+            const userData = req.body;
+            const result = await userDataCollection.insertOne(userData);
+            res.send(result);
+
+        })
+        //delete user From Database
+        app.delete('/user/admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await userCollection.deleteOne(query);
             res.send(result);
         })
 
