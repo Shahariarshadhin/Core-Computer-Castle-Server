@@ -46,6 +46,7 @@ async function run() {
         const buyingCollection = client.db('core_computer_castle').collection('buying');
         const userCollection = client.db('core_computer_castle').collection('users');
         const paymentCollection = client.db('core_computer_castle').collection('payments');
+        const reviewCollection = client.db('core_computer_castle').collection('reviews');
 
         //---------------show data from databse to ui--------------
 
@@ -204,6 +205,22 @@ async function run() {
             const updatedBuying = await buyingCollection.updateOne(filter, updatedDoc);
             res.send(updatedDoc);
         })
+
+        //add review to database
+        app.post('/review', async (req, res) => {
+            const newreview = req.body;
+            const result = await reviewCollection.insertOne(newreview);
+            res.send(result);
+        })
+
+        //add review to ui
+        app.get('/review', async (req, res) => {
+
+            const reviews = await reviewCollection.find().toArray();
+            res.send(reviews);
+        })
+
+
 
 
 
