@@ -220,6 +220,14 @@ async function run() {
             res.send(reviews);
         })
 
+        //add product to database by admin
+
+        app.post('/part', async (req, res) => {
+            const newParts = req.body;
+            const result = await partsCollection.insertOne(newParts);
+            res.send(result);
+        })
+
 
 
 
