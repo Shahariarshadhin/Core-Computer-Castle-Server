@@ -40,7 +40,7 @@ function verifyJWT(req, res, next) {
 async function run() {
 
     try {
-        await client.connect();
+        // await client.connect();
         console.log('Database connected');
         const partsCollection = client.db('core_computer_castle').collection('parts');
         const buyingCollection = client.db('core_computer_castle').collection('buying');
