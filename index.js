@@ -70,7 +70,7 @@ async function run() {
         //------------show user order to mu orders page--------
 
 
-        app.get('/buying', verifyJWT, async (req, res) => {
+        app.get('/buying', async (req, res) => {
             const buyer = req.query.buyer;
             const decodedEmail = req.decoded.email;
             if (buyer === decodedEmail) {
@@ -85,7 +85,7 @@ async function run() {
 
         })
 
-        app.get('/buying', verifyJWT, async (req, res) => {
+        app.get('/buying', async (req, res) => {
             const query = {};
             const cursor = buyingCollection.find(query);
             const buying = await cursor.toArray();
